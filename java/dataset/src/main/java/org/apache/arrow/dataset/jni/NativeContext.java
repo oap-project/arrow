@@ -18,7 +18,6 @@
 package org.apache.arrow.dataset.jni;
 
 import org.apache.arrow.memory.BufferAllocator;
-import org.apache.arrow.util.Preconditions;
 
 /**
  * Context for relevant classes of NativeDataSource.

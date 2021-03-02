@@ -35,7 +35,8 @@ public class JniWrapper {
   }
 
   /**
-   * Creates dataset factory for reading file
+   * Creates dataset factory for reading file.
+   *
    * @param path full path of the file
    * @param fileFormat format ID
    * @param startOffset random read position. -1 for reading from start.

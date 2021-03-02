@@ -25,7 +25,6 @@ import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.apache.arrow.dataset.DatasetTypes;
@@ -34,7 +33,6 @@ import org.apache.arrow.dataset.file.FileSystem;
 import org.apache.arrow.dataset.file.SingleFileDatasetFactory;
 import org.apache.arrow.dataset.filter.Filter;
 import org.apache.arrow.dataset.filter.FilterImpl;
-import org.apache.arrow.dataset.fragment.DataFragment;
 import org.apache.arrow.dataset.scanner.ScanOptions;
 import org.apache.arrow.dataset.scanner.ScanTask;
 import org.apache.arrow.dataset.scanner.Scanner;
