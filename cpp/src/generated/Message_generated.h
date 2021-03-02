@@ -32,22 +32,25 @@ struct MessageBuilder;
 enum class CompressionType : int8_t {
   LZ4_FRAME = 0,
   ZSTD = 1,
+  FASTPFOR = 2,
   MIN = LZ4_FRAME,
   MAX = ZSTD
 };
 
-inline const CompressionType (&EnumValuesCompressionType())[2] {
+inline const CompressionType (&EnumValuesCompressionType())[3] {
   static const CompressionType values[] = {
     CompressionType::LZ4_FRAME,
-    CompressionType::ZSTD
+    CompressionType::ZSTD,
+    CompressionType::FASTPFOR
   };
   return values;
 }
 
 inline const char * const *EnumNamesCompressionType() {
-  static const char * const names[3] = {
+  static const char * const names[4] = {
     "LZ4_FRAME",
     "ZSTD",
+    "FASTPFOR",
     nullptr
   };
   return names;

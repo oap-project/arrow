@@ -88,7 +88,7 @@ Result<Compression::type> Codec::GetCompressionType(const std::string& name) {
     return Compression::ZSTD;
   } else if (name == "bz2") {
     return Compression::BZ2;
-  } else if (name == "FASTPFOR") {
+  } else if (name == "fastpfor") {
     return Compression::FASTPFOR;
   } else {
     return Status::Invalid("Unrecognized compression type: ", name);
