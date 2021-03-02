@@ -29,7 +29,6 @@ import java.util.stream.StreamSupport;
 
 import org.apache.arrow.dataset.DatasetTypes;
 import org.apache.arrow.dataset.file.FileFormat;
-import org.apache.arrow.dataset.file.FileSystem;
 import org.apache.arrow.dataset.file.SingleFileDatasetFactory;
 import org.apache.arrow.dataset.filter.Filter;
 import org.apache.arrow.dataset.filter.FilterImpl;
@@ -49,8 +48,8 @@ import org.junit.Test;
 
 public class NativeDatasetTest {
 
-  private String sampleParquet() {
-    return NativeDatasetTest.class.getResource(File.separator + "userdata1.parquet").getPath();
+  private String sampleParquetLocal() {
+    return "file://" + NativeDatasetTest.class.getResource(File.separator + "userdata1.parquet").getPath();
   }
 
   private void testDatasetFactoryEndToEnd(DatasetFactory factory, int taskCount, int vectorCount, int rowCount) {
@@ -100,37 +99,24 @@ public class NativeDatasetTest {
 
   @Test
   public void testLocalFs() {
-    String path = sampleParquet();
+    String path = sampleParquetLocal();
     DatasetFactory discovery = new SingleFileDatasetFactory(
-        new RootAllocator(Long.MAX_VALUE), NativeMemoryPool.getDefault(), FileFormat.PARQUET, FileSystem.LOCAL,
-        path);
+        new RootAllocator(Long.MAX_VALUE), NativeMemoryPool.getDefault(), FileFormat.PARQUET, path);
     testDatasetFactoryEndToEnd(discovery, 1, 10, 1000);
   }
 
   @Test
   public void testSplitFile() {
-    String path = sampleParquet();
+    String path = sampleParquetLocal();
     DatasetFactory discovery = new SingleFileDatasetFactory(
-        new RootAllocator(Long.MAX_VALUE), NativeMemoryPool.getDefault(), FileFormat.PARQUET, FileSystem.LOCAL,
-        path, 0L, 0L);
+        new RootAllocator(Long.MAX_VALUE), NativeMemoryPool.getDefault(), FileFormat.PARQUET, path, 0L, 0L);
     testDatasetFactoryEndToEnd(discovery, 0, 0, 0);
     discovery = new SingleFileDatasetFactory(
-        new RootAllocator(Long.MAX_VALUE), NativeMemoryPool.getDefault(), FileFormat.PARQUET, FileSystem.LOCAL,
-        path, 0L, 100000L);
+        new RootAllocator(Long.MAX_VALUE), NativeMemoryPool.getDefault(), FileFormat.PARQUET, path, 0L, 100000L);
     testDatasetFactoryEndToEnd(discovery, 1, 10, 1000);
     discovery = new SingleFileDatasetFactory(
-        new RootAllocator(Long.MAX_VALUE), NativeMemoryPool.getDefault(), FileFormat.PARQUET, FileSystem.LOCAL,
-        path, 100000L, 200000L);
+        new RootAllocator(Long.MAX_VALUE), NativeMemoryPool.getDefault(), FileFormat.PARQUET, path, 100000L, 200000L);
     testDatasetFactoryEndToEnd(discovery, 0, 0, 0);
-  }
-
-  @Ignore
-  public void testHdfsWithFileProtocol() {
-    String path = "file:" + sampleParquet();
-    DatasetFactory discovery = new SingleFileDatasetFactory(
-        new RootAllocator(Long.MAX_VALUE), NativeMemoryPool.getDefault(), FileFormat.PARQUET, FileSystem.HDFS,
-        path);
-    testDatasetFactoryEndToEnd(discovery, 1, 10, 1000);
   }
 
   @Ignore
@@ -141,19 +127,18 @@ public class NativeDatasetTest {
 
     // If using libhdfs3, make sure ARROW_LIBHDFS3_DIR is set.
     // Install libhdfs3: https://medium.com/@arush.xtremelife/connecting-hadoop-hdfs-with-python-267234bb68a2
-    String path = "hdfs://localhost:9000/userdata1.parquet?use_hdfs3=1";
+    String path = "hdfs://localhost:9000/userdata1.parquet";
     DatasetFactory discovery = new SingleFileDatasetFactory(
-        new RootAllocator(Long.MAX_VALUE), NativeMemoryPool.getDefault(), FileFormat.PARQUET, FileSystem.HDFS,
-        path);
+        new RootAllocator(Long.MAX_VALUE), NativeMemoryPool.getDefault(), FileFormat.PARQUET, path);
     testDatasetFactoryEndToEnd(discovery, 1, 10, 1000);
   }
 
   @Test
   public void testScanner() throws Exception {
-    String path = sampleParquet();
+    String path = sampleParquetLocal();
     RootAllocator allocator = new RootAllocator(Long.MAX_VALUE);
     NativeDatasetFactory factory = new SingleFileDatasetFactory(
-        allocator, NativeMemoryPool.getDefault(), FileFormat.PARQUET, FileSystem.LOCAL,
+        allocator, NativeMemoryPool.getDefault(), FileFormat.PARQUET,
         path);
     Schema schema = factory.inspect();
     NativeDataset dataset = factory.finish(schema);
@@ -187,10 +172,10 @@ public class NativeDatasetTest {
 
   @Test
   public void testScannerWithFilter() throws Exception {
-    String path = sampleParquet();
+    String path = sampleParquetLocal();
     RootAllocator allocator = new RootAllocator(Long.MAX_VALUE);
     NativeDatasetFactory factory = new SingleFileDatasetFactory(
-        allocator, NativeMemoryPool.getDefault(), FileFormat.PARQUET, FileSystem.LOCAL,
+        allocator, NativeMemoryPool.getDefault(), FileFormat.PARQUET,
         path);
     Schema schema = factory.inspect();
     NativeDataset dataset = factory.finish(schema);
@@ -257,10 +242,10 @@ public class NativeDatasetTest {
       }
     });
     long resBefore = reserved.get();
-    String path = sampleParquet();
+    String path = sampleParquetLocal();
     RootAllocator allocator = new RootAllocator(Long.MAX_VALUE);
     NativeDatasetFactory factory = new SingleFileDatasetFactory(
-        allocator, pool, FileFormat.PARQUET, FileSystem.LOCAL,
+        allocator, pool, FileFormat.PARQUET,
         path);
     Schema schema = factory.inspect();
     NativeDataset dataset = factory.finish(schema);
@@ -301,10 +286,10 @@ public class NativeDatasetTest {
   // TODO fix for empty projector. Currently empty projector is treated as projection on all available columns.
   @Ignore
   public void testScannerWithEmptyProjector() {
-    String path = sampleParquet();
+    String path = sampleParquetLocal();
     RootAllocator allocator = new RootAllocator(Long.MAX_VALUE);
     NativeDatasetFactory factory = new SingleFileDatasetFactory(
-        allocator, NativeMemoryPool.getDefault(), FileFormat.PARQUET, FileSystem.LOCAL,
+        allocator, NativeMemoryPool.getDefault(), FileFormat.PARQUET,
         path);
     Schema schema = factory.inspect();
     NativeDataset dataset = factory.finish(schema);
