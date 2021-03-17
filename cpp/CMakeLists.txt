@@ -698,6 +698,10 @@ if(ARROW_WITH_ZLIB)
   endif()
 endif()
 
+if(ARROW_WITH_QAT)
+  list(APPEND ARROW_LINK_LIBS "qatzip")
+endif()
+
 if(ARROW_WITH_ZSTD)
   list(APPEND ARROW_STATIC_LINK_LIBS ${ARROW_ZSTD_LIBZSTD})
   if(zstd_SOURCE STREQUAL "SYSTEM")

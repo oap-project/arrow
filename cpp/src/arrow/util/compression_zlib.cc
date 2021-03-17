@@ -30,6 +30,7 @@
 #include "arrow/status.h"
 #include "arrow/util/logging.h"
 #include "arrow/util/macros.h"
+#include "arrow/util/io_util.h"
 
 namespace arrow {
 namespace util {
@@ -488,9 +489,93 @@ class GZipCodec : public Codec {
   int compression_level_;
 };
 
+#ifdef ARROW_WITH_QAT
+// ----------------------------------------------------------------------
+// QAT implementation
+#include <qatzip.h>
+__thread QzSession_T  g_qzSession = {
+  .internal = NULL,
+};
+
+class QatCodec : public Codec {
+ public:
+  Result<int64_t> Decompress(int64_t input_len, const uint8_t* input,
+                             int64_t output_buffer_len, uint8_t* output_buffer) override {
+    uint32_t compressed_size = static_cast<uint32_t>(input_len);
+    uint32_t uncompressed_size = static_cast<uint32_t>(output_buffer_len);
+    int ret = qzDecompress(&g_qzSession,
+                           reinterpret_cast<const uint8_t*>(input), &compressed_size,
+                           reinterpret_cast<uint8_t*>(output_buffer), &uncompressed_size);
+    if (ret == QZ_OK) {
+      return static_cast<int64_t>(uncompressed_size);
+    } else if(ret == QZ_PARAMS) {
+      return Status::IOError("QAT  *sess is NULL or member of params is invalid");
+    } else if(ret == QZ_FAIL) {
+      return Status::IOError("QAT Compression failure: Function did not succeed");
+    } else {
+      return Status::IOError("QAT compression failure with error:", ret);
+    }
+  }
+
+  int64_t MaxCompressedLen(int64_t input_len,
+                           const uint8_t* ARROW_ARG_UNUSED(input)) override {
+    DCHECK_GE(input_len, 0);
+    return qzMaxCompressedLength(static_cast<size_t>(input_len), &g_qzSession);
+  }
+
+  Result<int64_t> Compress(int64_t input_len, const uint8_t* input,
+                           int64_t output_buffer_len, uint8_t* output_buffer) override {
+    uint32_t uncompressed_size = static_cast<uint32_t>(input_len);
+    uint32_t compressed_size = static_cast<uint32_t>(output_buffer_len);
+    int ret = qzCompress(&g_qzSession,
+                         reinterpret_cast<const uint8_t*>(input), &uncompressed_size,
+                         reinterpret_cast<uint8_t*>(output_buffer), &compressed_size, 1);
+    if (ret == QZ_OK) {
+      return static_cast<int64_t>(compressed_size);
+    } else if(ret == QZ_PARAMS) {
+      return Status::IOError("QAT compression: *sess is NULL or member of params is invalid");
+    } else if(ret == QZ_FAIL) {
+      return Status::IOError("QAT compression: function did not succeed");
+    } else {
+      return Status::IOError("QAT compression failure with error:", ret);
+    }
+  }
+
+  Result<std::shared_ptr<Compressor>> MakeCompressor() override {
+    return Status::NotImplemented("Streaming compression unsupported with QAT");
+  }
+
+  Result<std::shared_ptr<Decompressor>> MakeDecompressor() override {
+    return Status::NotImplemented("Streaming decompression unsupported with QAT");
+  }
+
+  Compression::type compression_type() const override { return Compression::GZIP; }
+};
+#endif
+
 }  // namespace
 
 std::unique_ptr<Codec> MakeGZipCodec(int compression_level, GZipFormat::type format) {
+  auto maybe_env_var = arrow::internal::GetEnvVar("ARROW_GZIP_BACKEND");
+  if (!maybe_env_var.ok()) {
+    // No user gzip backend settings
+    return std::unique_ptr<Codec>(new GZipCodec(compression_level, format));
+  }
+
+  std::string s = *std::move(maybe_env_var);
+  std::transform(s.begin(), s.end(), s.begin(),
+                 [](unsigned char c) { return std::toupper(c); });
+  if (s == "QAT") {
+#ifdef ARROW_WITH_QAT
+    using arrow::util::internal::QatCodec;
+    return std::unique_ptr<Codec>(new QatCodec());
+#else
+    ARROW_LOG(WARNING) << "Support for codec QAT not built";
+#endif
+  } else if (!s.empty()) {
+    ARROW_LOG(WARNING) << "Invalid backend for ARROW_GZIP_BACKEND: " << s
+                       << ", only support QAT now";
+  }
   return std::unique_ptr<Codec>(new GZipCodec(compression_level, format));
 }
 
