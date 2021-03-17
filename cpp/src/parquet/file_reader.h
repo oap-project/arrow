@@ -36,15 +36,7 @@ class PageReader;
 class RandomAccessSource;
 class RowGroupMetaData;
 
-class PARQUET_EXPORT CacheManager {
- public:
-  CacheManager(){};
-  virtual ~CacheManager() = default;
-  virtual bool containsColumnChunk(::arrow::io::ReadRange range) = 0;
-  virtual std::shared_ptr<Buffer> getColumnChunk(::arrow::io::ReadRange range) = 0;
-  virtual bool cacheColumnChunk(::arrow::io::ReadRange range, std::shared_ptr<Buffer> data) = 0;
-  virtual bool deleteColumnChunk(::arrow::io::ReadRange range) = 0;
-};
+using CacheManager = ::arrow::io::internal::CacheManager;
 
 class PARQUET_EXPORT RowGroupReader {
  public:

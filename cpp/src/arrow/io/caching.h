@@ -70,13 +70,23 @@ struct ARROW_EXPORT CacheOptions {
 
 namespace internal {
 
+class ARROW_EXPORT CacheManager {
+ public:
+  CacheManager(){};
+  virtual ~CacheManager() = default;
+  virtual bool containsColumnChunk(::arrow::io::ReadRange range) = 0;
+  virtual std::shared_ptr<Buffer> getColumnChunk(::arrow::io::ReadRange range) = 0;
+  virtual bool cacheColumnChunk(::arrow::io::ReadRange range, std::shared_ptr<Buffer> data) = 0;
+  virtual bool deleteColumnChunk(::arrow::io::ReadRange range) = 0;
+};
+
 /// \brief A read cache designed to hide IO latencies when reading.
 ///
 /// To use this, you must first pass it the ranges you'll need in the future.
 /// The cache will combine those ranges according to parameters (see constructor)
 /// and start fetching the combined ranges in the background.
 /// You can then individually fetch them using Read().
-class ARROW_EXPORT ReadRangeCache {
+class ARROW_EXPORT ReadRangeCache: public std::enable_shared_from_this<ReadRangeCache> {
  public:
   static constexpr int64_t kDefaultHoleSizeLimit = 8192;
   static constexpr int64_t kDefaultRangeSizeLimit = 32 * 1024 * 1024;
@@ -99,9 +109,21 @@ class ARROW_EXPORT ReadRangeCache {
   /// \brief Read a range previously given to Cache().
   Result<std::shared_ptr<Buffer>> Read(ReadRange range);
 
+  void setCacheManager(std::shared_ptr<CacheManager> manager);
+
  protected:
   struct Impl;
   std::unique_ptr<Impl> impl_;
+  std::shared_ptr<CacheManager> cache_manager_;
+
+  Result<std::shared_ptr<Buffer>> CacheRange(
+    std::shared_ptr<RandomAccessFile> file,
+    ReadRange range);
+
+  Future<std::shared_ptr<Buffer>> CacheRangeAsync(
+    const AsyncContext& ctx,
+    std::shared_ptr<RandomAccessFile> file,
+    ReadRange range);
 };
 
 }  // namespace internal

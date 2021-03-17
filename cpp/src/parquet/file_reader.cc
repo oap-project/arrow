@@ -312,6 +312,12 @@ class SerializedFile : public ParquetFileReader::Contents {
             ComputeColumnChunkRange(file_metadata_.get(), source_size_, row, col));
       }
     }
+
+    // pre buffer with cache manager
+    if (cache_manager_) {
+      cached_source_->setCacheManager(cache_manager_);
+    }
+
     PARQUET_THROW_NOT_OK(cached_source_->Cache(ranges));
   }
 
