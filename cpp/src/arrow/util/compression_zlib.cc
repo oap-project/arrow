@@ -503,17 +503,16 @@ class QatCodec : public Codec {
                              int64_t output_buffer_len, uint8_t* output_buffer) override {
     uint32_t compressed_size = static_cast<uint32_t>(input_len);
     uint32_t uncompressed_size = static_cast<uint32_t>(output_buffer_len);
-    int ret = qzDecompress(&g_qzSession,
-                           reinterpret_cast<const uint8_t*>(input), &compressed_size,
-                           reinterpret_cast<uint8_t*>(output_buffer), &uncompressed_size);
+    int ret = qzDecompress(&g_qzSession, input, &compressed_size, output_buffer,
+                           &uncompressed_size);
     if (ret == QZ_OK) {
       return static_cast<int64_t>(uncompressed_size);
     } else if(ret == QZ_PARAMS) {
-      return Status::IOError("QAT  *sess is NULL or member of params is invalid");
+      return Status::IOError("QAT decompression failure: params is invalid");
     } else if(ret == QZ_FAIL) {
-      return Status::IOError("QAT Compression failure: Function did not succeed");
+      return Status::IOError("QAT decompression failure: Function did not succeed");
     } else {
-      return Status::IOError("QAT compression failure with error:", ret);
+      return Status::IOError("QAT decompression failure with error:", ret);
     }
   }
 
@@ -527,15 +526,14 @@ class QatCodec : public Codec {
                            int64_t output_buffer_len, uint8_t* output_buffer) override {
     uint32_t uncompressed_size = static_cast<uint32_t>(input_len);
     uint32_t compressed_size = static_cast<uint32_t>(output_buffer_len);
-    int ret = qzCompress(&g_qzSession,
-                         reinterpret_cast<const uint8_t*>(input), &uncompressed_size,
-                         reinterpret_cast<uint8_t*>(output_buffer), &compressed_size, 1);
+    int ret = qzCompress(&g_qzSession, input, &uncompressed_size, output_buffer,
+                         &compressed_size, 1);
     if (ret == QZ_OK) {
       return static_cast<int64_t>(compressed_size);
     } else if(ret == QZ_PARAMS) {
-      return Status::IOError("QAT compression: *sess is NULL or member of params is invalid");
+      return Status::IOError("QAT compression failure: params is invalid");
     } else if(ret == QZ_FAIL) {
-      return Status::IOError("QAT compression: function did not succeed");
+      return Status::IOError("QAT compression failure: function did not succeed");
     } else {
       return Status::IOError("QAT compression failure with error:", ret);
     }
