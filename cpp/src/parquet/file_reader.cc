@@ -211,16 +211,16 @@ class SerializedRowGroup : public RowGroupReader::Contents {
 
     // load column chunk data with cache
     bool cache_valid = false;
-    bool cache_hit = cache_manager_->containsColumnChunk(col_range);
+    bool cache_hit = cache_manager_->containsFileRange(col_range);
 
     if (cache_hit) {
-      std::shared_ptr<Buffer> data = cache_manager_->getColumnChunk(col_range);
+      std::shared_ptr<Buffer> data = cache_manager_->getFileRange(col_range);
       if (data) {
         stream = std::make_shared<::arrow::io::BufferReader>(data);
         cache_valid = true;
       } else {
         // delete invalid cache
-        cache_manager_->deleteColumnChunk(col_range);
+        cache_manager_->deleteFileRange(col_range);
         cache_valid = false;
       }
     }
@@ -230,7 +230,7 @@ class SerializedRowGroup : public RowGroupReader::Contents {
       stream = properties_.GetStream(source_, col_range.offset, col_range.length);
 
       // cache chunk data
-      cache_manager_->cacheColumnChunk(col_range,
+      cache_manager_->cacheFileRange(col_range,
         std::dynamic_pointer_cast<::arrow::io::BufferReader>(stream)->buffer());
     }
 

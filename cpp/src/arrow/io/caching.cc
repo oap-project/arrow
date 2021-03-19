@@ -165,35 +165,32 @@ Result<std::shared_ptr<Buffer>> ReadRangeCache::CacheRange(
   std::shared_ptr<RandomAccessFile> file,
   ReadRange range) {
 
-  Result<std::shared_ptr<Buffer>> ret;
+  std::shared_ptr<Buffer> data;
 
   // load data with cache manager
   bool cache_valid = false;
-  bool cache_hit = cache_manager_->containsColumnChunk(range);
+  bool cache_hit = cache_manager_->containsFileRange(range);
 
   if (cache_hit) {
-    std::shared_ptr<Buffer> data = cache_manager_->getColumnChunk(range);
+    data = cache_manager_->getFileRange(range);
     if (data) {
-      // make result
-      ret = data;
       cache_valid = true;
     } else {
       // delete invalid cache
-      cache_manager_->deleteColumnChunk(range);
+      cache_manager_->deleteFileRange(range);
       cache_valid = false;
     }
   }
 
   if (!cache_hit || !cache_valid) {
     // read column chunk from HDFS
-    ARROW_ASSIGN_OR_RAISE(auto data, file->ReadAt(range.offset, range.length));
-    ret = data;
+    ARROW_ASSIGN_OR_RAISE(data, file->ReadAt(range.offset, range.length));
 
     // cache chunk data
-    cache_manager_->cacheColumnChunk(range, data);
+    cache_manager_->cacheFileRange(range, data);
   }
 
-  return ret;
+  return data;
 }
 
 Future<std::shared_ptr<Buffer>> ReadRangeCache::CacheRangeAsync(

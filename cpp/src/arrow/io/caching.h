@@ -74,10 +74,10 @@ class ARROW_EXPORT CacheManager {
  public:
   CacheManager(){};
   virtual ~CacheManager() = default;
-  virtual bool containsColumnChunk(::arrow::io::ReadRange range) = 0;
-  virtual std::shared_ptr<Buffer> getColumnChunk(::arrow::io::ReadRange range) = 0;
-  virtual bool cacheColumnChunk(::arrow::io::ReadRange range, std::shared_ptr<Buffer> data) = 0;
-  virtual bool deleteColumnChunk(::arrow::io::ReadRange range) = 0;
+  virtual bool containsFileRange(::arrow::io::ReadRange range) = 0;
+  virtual std::shared_ptr<Buffer> getFileRange(::arrow::io::ReadRange range) = 0;
+  virtual bool cacheFileRange(::arrow::io::ReadRange range, std::shared_ptr<Buffer> data) = 0;
+  virtual bool deleteFileRange(::arrow::io::ReadRange range) = 0;
 };
 
 /// \brief A read cache designed to hide IO latencies when reading.
