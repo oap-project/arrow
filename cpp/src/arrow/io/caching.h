@@ -80,6 +80,15 @@ class ARROW_EXPORT CacheManager {
   virtual bool deleteFileRange(::arrow::io::ReadRange range) = 0;
 };
 
+class ARROW_EXPORT CacheManagerProvider {
+ public:
+  CacheManagerProvider() {};
+  virtual ~CacheManagerProvider() = default;
+  virtual std::shared_ptr<CacheManager> defaultCacheManager() = 0;
+  virtual std::shared_ptr<CacheManager> newCacheManager() = 0;
+};
+
+
 /// \brief A read cache designed to hide IO latencies when reading.
 ///
 /// To use this, you must first pass it the ranges you'll need in the future.
@@ -109,14 +118,15 @@ class ARROW_EXPORT ReadRangeCache: public std::enable_shared_from_this<ReadRange
   /// \brief Read a range previously given to Cache().
   Result<std::shared_ptr<Buffer>> Read(ReadRange range);
 
-  void setCacheManager(std::shared_ptr<CacheManager> manager);
+  void setCacheManagerProvider(std::shared_ptr<CacheManagerProvider> manager_provider);
 
  protected:
   struct Impl;
   std::unique_ptr<Impl> impl_;
-  std::shared_ptr<CacheManager> cache_manager_;
+  std::shared_ptr<CacheManagerProvider> cache_manager_provider_;
 
   Result<std::shared_ptr<Buffer>> CacheRange(
+    std::shared_ptr<CacheManager> cache_manager,
     std::shared_ptr<RandomAccessFile> file,
     ReadRange range);
 

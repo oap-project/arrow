@@ -37,6 +37,7 @@ class RandomAccessSource;
 class RowGroupMetaData;
 
 using CacheManager = ::arrow::io::internal::CacheManager;
+using CacheManagerProvider = ::arrow::io::internal::CacheManagerProvider;
 
 class PARQUET_EXPORT RowGroupReader {
  public:
@@ -48,7 +49,7 @@ class PARQUET_EXPORT RowGroupReader {
     virtual std::unique_ptr<PageReader> GetColumnPageReader(int i) = 0;
     virtual const RowGroupMetaData* metadata() const = 0;
     virtual const ReaderProperties* properties() const = 0;
-    virtual void setCacheManager(std::shared_ptr<CacheManager> manager) = 0;
+    virtual void setCacheManagerProvider(std::shared_ptr<CacheManagerProvider> manager_provider) = 0;
   };
 
   explicit RowGroupReader(std::unique_ptr<Contents> contents);
@@ -62,7 +63,7 @@ class PARQUET_EXPORT RowGroupReader {
 
   std::unique_ptr<PageReader> GetColumnPageReader(int i);
 
-  void setCacheManager(std::shared_ptr<CacheManager> manager);
+  void setCacheManagerProvider(std::shared_ptr<CacheManagerProvider> manager_provider);
 
  private:
   // Holds a pointer to an instance of Contents implementation
@@ -85,7 +86,7 @@ class PARQUET_EXPORT ParquetFileReader {
     virtual void Close() = 0;
     virtual std::shared_ptr<RowGroupReader> GetRowGroup(int i) = 0;
     virtual std::shared_ptr<FileMetaData> metadata() const = 0;
-    virtual void setCacheManager(std::shared_ptr<CacheManager> manager) = 0;
+    virtual void setCacheManagerProvider(std::shared_ptr<CacheManagerProvider> manager_provider) = 0;
   };
 
   ParquetFileReader();
@@ -148,7 +149,7 @@ class PARQUET_EXPORT ParquetFileReader {
                  const ::arrow::io::AsyncContext& ctx,
                  const ::arrow::io::CacheOptions& options);
 
-  void setCacheManager(std::shared_ptr<CacheManager> manager);
+  void setCacheManagerProvider(std::shared_ptr<CacheManagerProvider> manager_provider);
  private:
   // Holds a pointer to an instance of Contents implementation
   std::unique_ptr<Contents> contents_;
