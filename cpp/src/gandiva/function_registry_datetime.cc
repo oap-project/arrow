@@ -49,9 +49,17 @@ std::vector<NativeFunction> GetDateTimeFunctionRegistry() {
                      "castDATE_utf8",
                      NativeFunction::kNeedsContext | NativeFunction::kCanReturnErrors),
 
+      NativeFunction("castDATE", {}, DataTypeVector{utf8()}, date32(), kResultNullIfNull,
+                     "castDATE_utf8_date32",
+                     NativeFunction::kNeedsContext | NativeFunction::kCanReturnErrors),         
+
       NativeFunction("castTIMESTAMP", {}, DataTypeVector{utf8()}, timestamp(),
                      kResultNullIfNull, "castTIMESTAMP_utf8",
                      NativeFunction::kNeedsContext | NativeFunction::kCanReturnErrors),
+
+       NativeFunction("castTIMESTAMP", {}, DataTypeVector{utf8()}, timestamp_us(),
+                     kResultNullIfNull, "castTIMESTAMP_utf8_us",
+                     NativeFunction::kNeedsContext | NativeFunction::kCanReturnErrors),    
 
       NativeFunction("castVARCHAR", {}, DataTypeVector{date32(), int64()}, utf8(),
                      kResultNullIfNull, "castVARCHAR_date32_int64",
@@ -75,17 +83,31 @@ std::vector<NativeFunction> GetDateTimeFunctionRegistry() {
       NativeFunction("castTIMESTAMP", {}, DataTypeVector{date64()}, timestamp(),
                      kResultNullIfNull, "castTIMESTAMP_date64"),
 
+      NativeFunction("castTIMESTAMP", {}, DataTypeVector{date64()}, timestamp_us(),
+                     kResultNullIfNull, "castTIMESTAMP_date64_us"),    
+
       NativeFunction("castTIMESTAMP", {}, DataTypeVector{int64()}, timestamp(),
-                     kResultNullIfNull, "castTIMESTAMP_int64"),
+                     kResultNullIfNull, "castTIMESTAMP_int64"),                         
 
       NativeFunction("castDATE", {"to_date"}, DataTypeVector{timestamp()}, date64(),
                      kResultNullIfNull, "castDATE_timestamp"),
+
+      NativeFunction("castDATE", {"to_date"}, DataTypeVector{timestamp_us()}, date64(),
+                     kResultNullIfNull, "castDATE_timestamp_us"),
+
+      NativeFunction("castDATE", {"to_date"}, DataTypeVector{timestamp_us(), int32()}, date32(),
+                     kResultNullIfNull, "castDATE_timestamp_us_date32"),                               
 
       NativeFunction("castBIGINT", {}, DataTypeVector{day_time_interval()}, int64(),
                      kResultNullIfNull, "castBIGINT_daytimeinterval"),
 
       NativeFunction("extractDay", {}, DataTypeVector{day_time_interval()}, int64(),
                      kResultNullIfNull, "extractDay_daytimeinterval"),
+
+      NativeFunction("extractTimestampHour", {}, DataTypeVector{
+        timestamp_us(), int32()}, int64(),
+                     kResultNullIfNull, "extractTimestampHour"), 
+
   };
 
   return date_time_fn_registry_;

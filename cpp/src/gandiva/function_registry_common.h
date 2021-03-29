@@ -54,6 +54,7 @@ inline DataTypePtr time32() { return arrow::time32(arrow::TimeUnit::MILLI); }
 inline DataTypePtr time64() { return arrow::time64(arrow::TimeUnit::MICRO); }
 
 inline DataTypePtr timestamp() { return arrow::timestamp(arrow::TimeUnit::MILLI); }
+inline DataTypePtr timestamp_us() { return arrow::timestamp(arrow::TimeUnit::MICRO); }
 inline DataTypePtr decimal128() { return arrow::decimal(38, 0); }
 
 struct KeyHash {

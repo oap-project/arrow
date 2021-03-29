@@ -219,11 +219,20 @@ gdv_date64 castDATE_date32(gdv_date32 date);
 
 gdv_date32 castDATE_int32(gdv_int32 date);
 
+gdv_date32 castDATE_utf8_date32(int64_t execution_context, const char* input, gdv_int32 length);
+
 gdv_timestamp castTIMESTAMP_utf8(int64_t execution_context, const char* input,
                                  gdv_int32 length);
+gdv_timestamp castTIMESTAMP_utf8_us(int64_t execution_context, const char* input,
+                                 gdv_int32 length);                                                                
 gdv_timestamp castTIMESTAMP_date64(gdv_date64);
+gdv_timestamp castTIMESTAMP_date64_us(gdv_date64);
 gdv_timestamp castTIMESTAMP_int64(gdv_int64);
 gdv_date64 castDATE_timestamp(gdv_timestamp);
+gdv_date64 castDATE_timestamp_us(gdv_timestamp);
+gdv_date32 castDATE_timestamp_us_date32(gdv_timestamp, gdv_int32);
+gdv_date64 extractTimestampHour(gdv_timestamp, gdv_int32);
+
 const char* castVARCHAR_timestamp_int64(int64_t, gdv_timestamp, gdv_int64, gdv_int32*);
 
 const char* castVARCHAR_date32_int64(int64_t, gdv_date32, gdv_int64, gdv_int32*);
