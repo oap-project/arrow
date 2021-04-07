@@ -139,6 +139,24 @@ NUMERIC_DATE_TYPES(BINARY_RELATIONAL_NAN, greater_than_or_equal_to_with_nan, >=)
 
 #undef BINARY_RELATIONAL_NAN
 
+// normalize
+#define NORMALIZE(IN_TYPE, OUT_TYPE)                                    \
+  FORCE_INLINE                                                          \
+  gdv_##OUT_TYPE normalize_##IN_TYPE(gdv_##IN_TYPE in) {                \
+    if (isnan(in)) {                                                    \
+      return 0.0 / 0.0;                                                 \
+    } else if (in < 0 && std::abs(in) < 0.0000001) {                    \
+      return 0.0;                                                       \
+    } else {                                                            \
+      return in;                                                        \
+    }                                                                   \
+  }
+
+NORMALIZE(float64, float64)
+NORMALIZE(float32, float32)
+
+#undef NORMALIZE
+
 // cast fns : takes one param type, returns another type.
 #define CAST_UNARY(NAME, IN_TYPE, OUT_TYPE)           \
   FORCE_INLINE                                        \
