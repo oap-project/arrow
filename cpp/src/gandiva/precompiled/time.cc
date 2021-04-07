@@ -749,6 +749,18 @@ gdv_date64 castDATE_timestamp(gdv_timestamp timestamp_in_millis) {
   return tp.ClearTimeOfDay().MillisSinceEpoch();
 }
 
+gdv_timestamp convertTimestampUnit_ms(gdv_timestamp timestamp_in_millis) {
+  return timestamp_in_millis * 1000;
+}
+
+gdv_timestamp convertTimestampUnit_us(gdv_timestamp timestamp_in_micro) {
+  return timestamp_in_micro / 1000;
+}
+
+gdv_date32 castDATE_date64(gdv_date64 date_in_millis) {
+  return static_cast<gdv_date32>(date_in_millis / (MILLIS_IN_DAY));
+}
+
 const char* castVARCHAR_timestamp_int64(gdv_int64 context, gdv_timestamp in,
                                         gdv_int64 length, gdv_int32* out_len) {
   gdv_int64 year = extractYear_timestamp(in);
