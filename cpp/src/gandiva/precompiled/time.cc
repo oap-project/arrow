@@ -528,6 +528,11 @@ void set_error_for_date(gdv_int32 length, const char* input, const char* msg,
   free(error);
 }
 
+gdv_date32 castDATE_utf8_date32(int64_t context, const char* input, gdv_int32 length) {
+  gdv_date64 days_mills = castDATE_utf8(context, input, length);
+  return static_cast<gdv_date32>(days_mills / MILLIS_IN_DAY);
+}
+
 gdv_date64 castDATE_utf8(int64_t context, const char* input, gdv_int32 length) {
   using arrow_vendored::date::day;
   using arrow_vendored::date::month;
@@ -581,6 +586,7 @@ gdv_date64 castDATE_utf8(int64_t context, const char* input, gdv_int32 length) {
     set_error_for_date(length, input, msg, context);
     return 0;
   }
+
   return std::chrono::time_point_cast<std::chrono::milliseconds>(sys_days(date))
       .time_since_epoch()
       .count();
@@ -627,6 +633,12 @@ const char* castVARCHAR_date32_int64(gdv_int64 context, gdv_date32 in_day,
 
   memcpy(ret, char_buffer, *out_len);
   return ret;
+}
+
+
+gdv_timestamp castTIMESTAMP_utf8_us(int64_t context, const char* input, gdv_int32 length) {
+  gdv_timestamp timestamp_ms = castTIMESTAMP_utf8(context, input, length);
+  return timestamp_ms * 1000;
 }
 
 /*
@@ -742,11 +754,27 @@ gdv_timestamp castTIMESTAMP_utf8(int64_t context, const char* input, gdv_int32 l
 
 gdv_timestamp castTIMESTAMP_date64(gdv_date64 date_in_millis) { return date_in_millis; }
 
+gdv_timestamp castTIMESTAMP_date64_us(gdv_date64 date_in_millis) { return date_in_millis * 1000; }
+
 gdv_timestamp castTIMESTAMP_int64(gdv_int64 in) { return in; }
 
 gdv_date64 castDATE_timestamp(gdv_timestamp timestamp_in_millis) {
   EpochTimePoint tp(timestamp_in_millis);
   return tp.ClearTimeOfDay().MillisSinceEpoch();
+}
+
+gdv_date64 castDATE_timestamp_us(gdv_timestamp timestamp_in_us) {
+  EpochTimePoint tp(timestamp_in_us / 1000);
+  return tp.ClearTimeOfDay().MillisSinceEpoch();
+}
+
+gdv_date32 castDATE_timestamp_us_date32(gdv_timestamp timestamp_in_us, gdv_int32 offset) {
+  gdv_date64 days_mills = timestamp_in_us / 1000 + offset;
+  return static_cast<gdv_date32>(days_mills / MILLIS_IN_DAY);
+}
+
+gdv_date64 extractTimestampHour(gdv_timestamp timestamp_in_us, gdv_int32 offset) {
+  return extractHour_timestamp(timestamp_in_us / 1000 + offset);
 }
 
 const char* castVARCHAR_timestamp_int64(gdv_int64 context, gdv_timestamp in,
