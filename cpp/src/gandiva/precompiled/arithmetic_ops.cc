@@ -145,7 +145,7 @@ NUMERIC_DATE_TYPES(BINARY_RELATIONAL_NAN, greater_than_or_equal_to_with_nan, >=)
   gdv_##OUT_TYPE normalize_##IN_TYPE(gdv_##IN_TYPE in) {                \
     if (isnan(in)) {                                                    \
       return 0.0 / 0.0;                                                 \
-    } else if (in < 0 && std::abs(in) < 0.0000001) {                    \
+    } else if (std::abs(in) < 0.0000001) {                              \
       return 0.0;                                                       \
     } else {                                                            \
       return in;                                                        \
