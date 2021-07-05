@@ -922,13 +922,28 @@ gdv_timestamp seconds_to_timestamp_int64(gdv_int64 in) {
 }
 
 FORCE_INLINE
+gdv_timestamp seconds_to_timestamp_int32(gdv_int32 in) {
+  return (int64_t)in * 1000000;
+}
+
+FORCE_INLINE
 gdv_timestamp millis_to_timestamp_int64(gdv_int64 in) {
   return in * 1000;
 }
 
 FORCE_INLINE
+gdv_timestamp millis_to_timestamp_int32(gdv_int32 in) {
+  return (int64_t)in * 1000;
+}
+
+FORCE_INLINE
 gdv_timestamp micros_to_timestamp_int64(gdv_int64 in) {
   return in;
+}
+
+FORCE_INLINE
+gdv_timestamp micros_to_timestamp_int32(gdv_int32 in) {
+  return (int64_t)in;
 }
 
 FORCE_INLINE

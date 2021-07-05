@@ -123,11 +123,20 @@ std::vector<NativeFunction> GetDateTimeFunctionRegistry() {
       NativeFunction("seconds_to_timestamp", {}, DataTypeVector{int64()}, timestampusutc(),
                      kResultNullIfNull, "seconds_to_timestamp_int64"),
 
+      NativeFunction("seconds_to_timestamp", {}, DataTypeVector{int32()}, timestampusutc(),
+                     kResultNullIfNull, "seconds_to_timestamp_int32"),
+
       NativeFunction("millis_to_timestamp", {}, DataTypeVector{int64()}, timestampusutc(),
                      kResultNullIfNull, "millis_to_timestamp_int64"),
+      
+      NativeFunction("millis_to_timestamp", {}, DataTypeVector{int32()}, timestampusutc(),
+                     kResultNullIfNull, "millis_to_timestamp_int32"),
 
       NativeFunction("micros_to_timestamp", {}, DataTypeVector{int64()}, timestampusutc(),
                      kResultNullIfNull, "micros_to_timestamp_int64"),
+
+      NativeFunction("micros_to_timestamp", {}, DataTypeVector{int32()}, timestampusutc(),
+                     kResultNullIfNull, "micros_to_timestamp_int32"),
 
       NativeFunction("date_diff", {}, DataTypeVector{date32(), date32()}, int32(),
                      kResultNullIfNull, "micros_to_timestamp_date32_date32"),
