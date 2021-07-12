@@ -220,10 +220,14 @@ CAST_UNARY_UTF8(castVARCHAR, int8, utf8, "%d", NOFMT, nothing)
 CAST_UNARY_UTF8(castVARCHAR, int16, utf8, "%d", NOFMT, nothing)
 CAST_UNARY_UTF8(castVARCHAR, int32, utf8, "%d", NOFMT, nothing)
 CAST_UNARY_UTF8(castVARCHAR, int64, utf8, "%ld", NOFMT, nothing)
-// CAST_UNARY_UTF8(castVARCHAR, float32, utf8, "%.*f", FMT, FLT_DIG)
-// CAST_UNARY_UTF8(castVARCHAR, float64, utf8, "%.*f", FMT, DBL_DIG)
-CAST_UNARY_UTF8(castVARCHAR, float32, utf8, "%g", NOFMT, nothing)
-CAST_UNARY_UTF8(castVARCHAR, float64, utf8, "%g", NOFMT, nothing)
+// We set to display the full precision of Float/Double, but this may still behave 
+// differently with vanilla spark.
+CAST_UNARY_UTF8(castVARCHAR, float32, utf8, "%.*f", FMT, FLT_DIG)
+CAST_UNARY_UTF8(castVARCHAR, float64, utf8, "%.*f", FMT, DBL_DIG)
+// %g means converting floating-point number depending on the value and the precision. 
+// It bahaves similar to the shortest representation.
+// CAST_UNARY_UTF8(castVARCHAR, float32, utf8, "%g", NOFMT, nothing)
+// CAST_UNARY_UTF8(castVARCHAR, float64, utf8, "%g", NOFMT, nothing)
 
 #undef CAST_UNARY_UTF8
 
