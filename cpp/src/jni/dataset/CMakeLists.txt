@@ -27,6 +27,8 @@ find_package(JNI REQUIRED)
 
 add_custom_target(arrow_dataset_jni)
 
+arrow_install_all_headers("jni/dataset")
+
 set(JNI_HEADERS_DIR "${CMAKE_CURRENT_BINARY_DIR}/generated")
 
 add_subdirectory(../../../../java/dataset ./java)
